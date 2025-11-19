@@ -1,32 +1,33 @@
-import React, {useState} from "react";
+import React from "react";
 
-function MiLista(props){
-    
-
-    
-    return(
-        <div ClassName='lista'>
-            <ul>
-                {
-                    props.incidencias.map((i)=> (
-                        <li>
-                            
-                            <strong>ID incidencia:</strong> {i.id_incidencias}<br></br>
-                            <strong>Titulo: </strong>{i.titulo}<br></br>
-                            <strong>Descripcion: </strong>{i.descripcion}<br></br>
-                            <strong>Categoria: </strong>{i.categoria}<br></br>
-                            <strong>Nivel de urgencia: </strong>{i.nivel_urgencia}<br></br>
-                            <strong>Fecha de registro: </strong>{i.fecha_registro}<br></br>
-                            <strong>Estado: </strong>{i.estado}<br></br>
-                            <strong>Ubicacion: </strong>{i.ubicacion}<br></br>
-                            
-                        </li>
-                        
-                    ))
-
-                }
-            </ul>
-        </div>
+function MiLista(props) {
+    return (
+        <table className="table table-striped table-hover table-dark shadow-sm">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Título</th>
+                    <th>Usuario</th>
+                    <th>Urgencia</th>
+                    <th>Ubicación</th>
+                    <th>Estado</th>
+                    <th>Fecha Registro</th>
+                </tr>
+            </thead>
+            <tbody>
+                {props.incidencias.map((i) => (
+                    <tr key={i.id_incidencias}>
+                        <td>{i.id_incidencias}</td>
+                        <td>{i.titulo}</td>
+                        <td>{i.id_usuario}</td>
+                        <td>{i.nivel_urgencia}</td>
+                        <td>{i.ubicacion}</td>
+                        <td>{i.estado}</td>
+                        <td>{i.fecha_registro}</td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
     );
 }
 
