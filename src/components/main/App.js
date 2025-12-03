@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import MiLista from '../lista/MiLista';
 import Header from '../header/Header.js';
 import Footer from '../footer/Footer.js';
@@ -6,85 +6,110 @@ import Form from './Form.js';
 import Fondo from '../../img/fondo.jpg';
 
 function App() {
-    const [incidencias, setIncidencias] = useState([
-        {
-            id_incidencias: 1,
-            id_usuario: "lucasgd98",
-            titulo: "Proyecto averiado",
-            descripcion: "Proyector averiado en el aula 2",
-            categoria: "Hardware",
-            nivel_urgencia: "Media",
-            fecha_registro: "2025-10-20",
-            estado: "Abierto",
-            ubicacion: "B205"
-        },
-        {
-            id_incidencias: 2,
-            id_usuario: "marialopez",
-            titulo: "Ordenador no enciende",
-            descripcion: "El ordenador del puesto 15 no arranca",
-            categoria: "Hardware",
-            nivel_urgencia: "Alta",
-            fecha_registro: "2025-10-21",
-            estado: "En proceso",
-            ubicacion: "A103"
-        },
-        {
-            id_incidencias: 3,
-            id_usuario: "carlosm",
-            titulo: "Impresora sin conexión",
-            descripcion: "La impresora de la sala de profesores no se conecta a la red",
-            categoria: "Red",
-            nivel_urgencia: "Baja",
-            fecha_registro: "2025-10-22",
-            estado: "Abierto",
-            ubicacion: "Sala Profesores"
-        }
-    ]);
 
-    const agregarincidencia = (
+    const INCIDENCIA_API_URL = 'http://localhost:3004/incidencias';
+    const USUARIO_API_URL = 'http://localhost:3004/users';
+
+    const [usuarios, setUsuarios] = useState([]);
+    const [incidencias, setIncidencias] = useState([]);
+
+    // Cargar incidencias y usuarios
+    useEffect(() => {
+
+        const obtenerIncidencias = async () => {
+            try {
+                let response = await fetch(INCIDENCIA_API_URL);
+                if (!response.ok) throw new Error("HTTP Error");
+                const data = await response.json();
+                setIncidencias(data);
+            } catch (e) {
+                console.error("Error al cargar incidencias:", e);
+            }
+        };
+
+        const obtenerUsuarios = async () => {
+            try {
+                let response = await fetch(USUARIO_API_URL);
+                if (!response.ok) throw new Error("HTTP Error");
+                const data = await response.json();
+                setUsuarios(data);
+            } catch (e) {
+                console.error("Error al cargar usuarios:", e);
+            }
+        };
+
+        obtenerIncidencias();
+        obtenerUsuarios();
+
+    }, []);
+
+
+    // ⭐ MÉTODO CORRECTO PARA AGREGAR INCIDENCIA
+    const agregarIncidencia = async (
         titulo_nuevo,
         usuario_nuevo,
         descripcion_nuevo,
         categoria_nuevo,
-        nivel_urgencia_nuevo,
+        nivelurgencia_nuevo,
         ubicacion_nuevo
     ) => {
-        const fecha = new Date();
-        const year = fecha.getFullYear();
-        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-        const dia = String(fecha.getDate()).padStart(2, '0');
-        const fecha_formateada = `${year}-${mes}-${dia}`;
-        
-        const nueva_incidencia = {
-            id_incidencias: incidencias.length + 1,
-            id_usuario: usuario_nuevo,
-            titulo: titulo_nuevo,
-            descripcion: descripcion_nuevo,
-            categoria: categoria_nuevo,
-            nivel_urgencia: nivel_urgencia_nuevo,
-            fecha_registro: fecha_formateada,
-            estado: "Abierta",
-            ubicacion: ubicacion_nuevo
-        };
-        
-        setIncidencias([...incidencias, nueva_incidencia]);
+        try {
+            const fecha = new Date();
+            const fecha_formateada = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}-${String(fecha.getDate()).padStart(2, '0')}`;
+
+            let usuarioEncontrado = usuarios.find(u => u.email === usuario_nuevo);
+
+            if (!usuarioEncontrado) {
+                alert("Usuario no encontrado");
+                return;
+            }
+
+            const nueva_incidencia = {
+                usuario: usuarioEncontrado,
+                titulo: titulo_nuevo,
+                descripcion: descripcion_nuevo,
+                categoria: categoria_nuevo,
+                nivel_urgencia: nivelurgencia_nuevo,
+                fecha_registro: fecha_formateada,
+                ubicacion: ubicacion_nuevo,
+                estado: "Abierta",
+                comentarios: []
+            };
+
+            let response = await fetch(INCIDENCIA_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(nueva_incidencia)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error POST: ${response.status}`);
+            }
+
+            const data = await response.json();
+            setIncidencias([...incidencias, data]);
+
+        } catch (e) {
+            console.error("Error al crear la incidencia:", e);
+        }
     };
 
     return (
         <>
             <Header />
-            <div className="card border-0" style={{ 
-                backgroundImage: `url(${Fondo})`, 
-                backgroundSize: "cover", 
+            <div className="card border-0" style={{
+                backgroundImage: `url(${Fondo})`,
+                backgroundSize: "cover",
                 backgroundRepeat: "no-repeat",
                 minHeight: "100vh"
             }}>
-                <h2 className="card-title mb-5 mt-4 text-center text-white bg-dark bg-opacity-75 p-3 mx-auto rounded" style={{maxWidth: "600px"}}>
+                <h2 className="card-title mb-5 mt-4 text-center text-white bg-dark bg-opacity-75 p-3 mx-auto rounded" style={{ maxWidth: "600px" }}>
                     Panel de Control de Incidencias
                 </h2>
+
                 <div className="container-fluid mt-3 px-5">
                     <div className="row g-4">
+
                         <aside className="col-lg-7 col-md-12">
                             <div className="bg-white bg-opacity-90 p-4 rounded shadow-lg">
                                 <h4 className="text-info mb-4">
@@ -93,11 +118,13 @@ function App() {
                                 <MiLista incidencias={incidencias} />
                             </div>
                         </aside>
+
                         <main className="col-lg-5 col-md-12">
                             <div className="bg-white bg-opacity-90 rounded shadow-lg">
-                                <Form agregarincidencia={agregarincidencia} />
+                                <Form agregarIncidencia={agregarIncidencia} />
                             </div>
                         </main>
+
                     </div>
                 </div>
             </div>

@@ -16,10 +16,10 @@ function MiLista(props) {
             </thead>
             <tbody>
                 {props.incidencias.map((i) => (
-                    <tr key={i.id_incidencias}>
-                        <td>{i.id_incidencias}</td>
+                    <tr key={i.id}>
+                        <td>{i.id}</td>
                         <td>{i.titulo}</td>
-                        <td>{i.id_usuario}</td>
+                        <td>{i.usuario.email}</td>
                         <td>{i.nivel_urgencia}</td>
                         <td>{i.ubicacion}</td>
                         <td>{i.estado}</td>
