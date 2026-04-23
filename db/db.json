@@ -296,6 +296,29 @@
       "estado": "Abierta",
       "comentarios": [],
       "id": 13
+    },
+    {
+      "usuario": {
+        "id": 4,
+        "nombre": "Luis",
+        "email": "luis.torres@educastur.org",
+        "password": "$2y$10$gU1byqj/EyDQbUIFaV1b0.vKiCkE3oZZ1BxfVCSxO7z8Y/QIhqmo6",
+        "rol": {
+          "id": 1,
+          "nombre_rol": "comun",
+          "descripcion": "Usuario regular del sistema"
+        },
+        "fecha_registro": "2025-10-21"
+      },
+      "titulo": "asdfffffff",
+      "descripcion": "afsa",
+      "categoria": "Software",
+      "nivel_urgencia": "Alta",
+      "fecha_registro": "2026-04-23",
+      "ubicacion": "b242",
+      "estado": "Abierta",
+      "comentarios": [],
+      "id": 14
     }
   ],
   "users": [
