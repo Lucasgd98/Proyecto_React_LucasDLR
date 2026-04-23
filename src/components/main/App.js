@@ -3,15 +3,18 @@ import MiLista from '../lista/MiLista';
 import Header from '../header/Header.js';
 import Footer from '../footer/Footer.js';
 import Form from './Form.js';
+import Login from './Login.js';
 import Fondo from '../../img/fondo.jpg';
 
 function App() {
 
     const INCIDENCIA_API_URL = 'http://localhost:3004/incidencias';
     const USUARIO_API_URL = 'http://localhost:3004/users';
+    const LOGIN_API_URL = 'http://localhost:3004/login';
 
     const [usuarios, setUsuarios] = useState([]);
     const [incidencias, setIncidencias] = useState([]);
+    const [usuarioLogueado, setUsuarioLogueado] = useState(null);
 
     // Cargar incidencias y usuarios
     useEffect(() => {
@@ -44,7 +47,32 @@ function App() {
     }, []);
 
 
-    // ⭐ MÉTODO CORRECTO PARA AGREGAR INCIDENCIA
+    // Función onLogin - hace POST a /login con json-server-auth
+    const onLogin = async (email, password) => {
+        try {
+            const response = await fetch(LOGIN_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ "email": email, "password": password }),
+            });
+
+            if (response.ok) {
+                const userData = await response.json();
+                setUsuarioLogueado(userData);
+            } else {
+                const errorData = await response.json();
+                alert(`Fallo de autenticación. Error: ${response.status}: ${errorData}`);
+            }
+        } catch (e) {
+            console.error("Error en el login:", e);
+            alert("Error de conexión con el servidor.");
+        }
+    };
+
+
+    // Agregar incidencia
     const agregarIncidencia = async (
         titulo_nuevo,
         usuario_nuevo,
@@ -110,20 +138,30 @@ function App() {
                 <div className="container-fluid mt-3 px-5">
                     <div className="row g-4">
 
-                        <aside className="col-lg-7 col-md-12">
-                            <div className="bg-white bg-opacity-90 p-4 rounded shadow-lg">
-                                <h4 className="text-info mb-4">
-                                    <i className="bi bi-list-ul"></i> Listado de Incidencias Registradas
-                                </h4>
-                                <MiLista incidencias={incidencias} />
-                            </div>
-                        </aside>
+                        {!usuarioLogueado ? (
+                            <aside className="col-12">
+                                <div className="bg-white bg-opacity-90 p-4 rounded shadow-lg">
+                                    <Login onLogin={onLogin} />
+                                </div>
+                            </aside>
+                        ) : (
+                            <>
+                                <aside className="col-lg-7 col-md-12">
+                                    <div className="bg-white bg-opacity-90 p-4 rounded shadow-lg">
+                                        <h4 className="text-info mb-4">
+                                            <i className="bi bi-list-ul"></i> Listado de Incidencias Registradas
+                                        </h4>
+                                        <MiLista incidencias={incidencias} />
+                                    </div>
+                                </aside>
 
-                        <main className="col-lg-5 col-md-12">
-                            <div className="bg-white bg-opacity-90 rounded shadow-lg">
-                                <Form agregarIncidencia={agregarIncidencia} />
-                            </div>
-                        </main>
+                                <main className="col-lg-5 col-md-12">
+                                    <div className="bg-white bg-opacity-90 rounded shadow-lg">
+                                        <Form agregarIncidencia={agregarIncidencia} />
+                                    </div>
+                                </main>
+                            </>
+                        )}
 
                     </div>
                 </div>
